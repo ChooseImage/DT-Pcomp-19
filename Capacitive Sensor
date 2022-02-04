@@ -1,0 +1,62 @@
+#include <CapacitiveSensor.h>
+int led1 = 12;
+int led2 = 11;
+
+int led1State = LOW;
+int led2State = LOW;
+
+unsigned long csSum;
+
+
+
+CapacitiveSensor   cs_4_2 = CapacitiveSensor(4,2);     
+
+
+void setup()                    
+{
+   cs_4_2.set_CS_AutocaL_Millis(0xFFFFFFFF);     
+   Serial.begin(9600);
+   pinMode(led1, OUTPUT);
+   led1State = LOW;
+    led2State = LOW;
+   
+}
+
+void loop()                    
+{
+  digitalWrite (led1, led1State);
+  digitalWrite (led2, led2State);
+
+  
+  CSread();                         
+  delay(100);
+}
+
+void CSread() {
+    long cs = cs_4_2.capacitiveSensor(240); //resolution 80
+  if (cs > 370) { 
+    csSum += cs;
+    Serial.print("TOUCHING");
+    Serial.println(cs); 
+    if (csSum >= 15000) 
+    {
+      Serial.print("Trigger: ");
+      Serial.println(csSum);
+      led2State = HIGH;
+      led1State = HIGH;
+      if (csSum > 0) { csSum = 0; } 
+      cs_4_2.reset_CS_AutoCal(); //Stop
+    }
+  }
+ // else if (csSum >= 30000){
+ //   led2State = HIGH;
+ // }
+
+  else {
+    //led2State = LOW;
+    Serial.print("NOT TOUCHING");
+    Serial.println(cs);
+    csSum = 0; 
+  }
+
+}
